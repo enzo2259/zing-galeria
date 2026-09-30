@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Zing · Pantalla en vivo</title>
+<link rel="icon" href="/logo.png" />
+<style>
+  @font-face { font-family: "Chakra"; src: url(/fuentes/chakra-petch-500.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+  @font-face { font-family: "Chakra"; src: url(/fuentes/chakra-petch-700.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+  @font-face { font-family: "Barlow"; src: url(/fuentes/barlow-600.woff2) format("woff2"); font-weight: 600; font-display: swap; }
+  @font-face { font-family: "JetBrains"; src: url(/fuentes/jetbrains-mono-400.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+
+  :root {
+    --amarillo: #ffe02f; --naranja: #ff7a00; --rosa: #ff3266; --magenta: #d50d7e;
+    --vacio: #07031a; --texto: #f6efff; --suave: #b3a7d6; --ok: #37f5b0;
+    --zing: linear-gradient(100deg, var(--amarillo), var(--naranja) 32%, var(--rosa) 68%, var(--magenta));
+    --zing-h: linear-gradient(90deg, var(--naranja), var(--rosa), var(--magenta));
+    --titulo: "Chakra", "Avenir Next Condensed", sans-serif;
+    --mono: "JetBrains", ui-monospace, Menlo, monospace;
+    --u: min(1vw, 1.78vh); /* unidad que escala con la pantalla (16:9) */
+    --cambio: 1.4s;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #000; color: var(--texto); overflow: hidden; font-family: "Barlow", sans-serif; }
+  body.quieto { cursor: none; }
+  [hidden] { display: none !important; }
+  .gradiente { background: var(--zing); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* ---------- Escena: dos capas que se funden ---------- */
+  .capa { position: absolute; inset: 0; opacity: 0; transition: opacity var(--cambio) ease; overflow: hidden; }
+  .capa.on { opacity: 1; }
+  .capa .fondo { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(40px) brightness(.45) saturate(1.3); transform: scale(1.1); }
+  .capa .foto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .capa .foto img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 calc(8 * var(--u)) rgba(0,0,0,.6); }
+  /* Fotos horizontales: llenan la pantalla. Verticales: centradas sobre su propio fondo desenfocado. */
+  .capa.llena .foto img { width: 100%; height: 100%; object-fit: cover; box-shadow: none; }
+  .capa.on .foto img { animation: burns var(--dura, 8s) ease-out both; transform-origin: var(--ox, 50%) var(--oy, 50%); }
+  @keyframes burns { from { transform: scale(var(--z0, 1)); } to { transform: scale(var(--z1, 1.08)); } }
+
+  /* Mosaico: 1 grande + 4 chicas */
+  .mosaico { position: absolute; inset: 0; display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: calc(.6 * var(--u)); padding: calc(.6 * var(--u)); background: var(--vacio); }
+  .mosaico div { background-size: cover; background-position: center; opacity: 0; transform: scale(1.06); animation: pieza .9s cubic-bezier(.2,.8,.2,1) forwards; }
+  .mosaico div:first-child { grid-row: span 2; }
+  @keyframes pieza { to { opacity: 1; transform: none; } }
+
+  /* ---------- Capa de informacion ---------- */
+  .info { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+  .info::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 38%; background: linear-gradient(0deg, rgba(7,3,26,.88), transparent); }
+  .arriba { position: absolute; top: calc(2.4 * var(--u)); left: calc(3 * var(--u)); right: calc(3 * var(--u)); display: flex; justify-content: space-between; align-items: center; z-index: 1; }
+  .vivo { display: inline-flex; align-items: center; gap: calc(.8 * var(--u)); padding: calc(.6 * var(--u)) calc(1.3 * var(--u)); border-radius: 99px; background: rgba(7,3,26,.6); backdrop-filter: blur(8px);
+    font: calc(1.1 * var(--u)) var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--ok); }
+  .vivo i { width: calc(.9 * var(--u)); height: calc(.9 * var(--u)); border-radius: 50%; background: var(--ok); animation: latido 1.6s infinite; }
+  @keyframes latido { 0% { box-shadow: 0 0 0 0 rgba(55,245,176,.6); } 70%, 100% { box-shadow: 0 0 0 calc(1 * var(--u)) rgba(55,245,176,0); } }
+  .cuenta { font: calc(1.1 * var(--u)) var(--mono); letter-spacing: .14em; color: var(--suave); padding: calc(.6 * var(--u)) calc(1.3 * var(--u)); border-radius: 99px; background: rgba(7,3,26,.6); backdrop-filter: blur(8px); }
+  .abajo { position: absolute; left: calc(3 * var(--u)); right: calc(3 * var(--u)); bottom: calc(3 * var(--u)); display: flex; justify-content: space-between; align-items: flex-end; z-index: 1; }
+  .momento { max-width: 60%; }
+  .momento .que { font: 700 calc(5.2 * var(--u))/0.95 var(--titulo); text-transform: uppercase; letter-spacing: .02em; filter: drop-shadow(0 calc(.3 * var(--u)) calc(1.5 * var(--u)) rgba(0,0,0,.5)); transition: opacity .6s; }
+  .momento .linea { width: calc(8 * var(--u)); height: calc(.4 * var(--u)); margin: calc(1.2 * var(--u)) 0; background: var(--zing-h); box-shadow: 0 0 calc(1.5 * var(--u)) var(--rosa); }
+  .momento .evento { display: flex; align-items: center; gap: calc(1.2 * var(--u)); font: 500 calc(1.6 * var(--u)) var(--titulo); letter-spacing: .14em; text-transform: uppercase; color: var(--texto); }
+  .momento .evento img { height: calc(3 * var(--u)); filter: drop-shadow(0 0 calc(1 * var(--u)) rgba(255,50,102,.5)); }
+  .de-invitado { display: inline-block; margin-bottom: calc(1 * var(--u)); padding: calc(.4 * var(--u)) calc(1.1 * var(--u)); border-radius: 99px; background: rgba(255, 224, 47, .15); border: 1px solid rgba(255, 224, 47, .5); font: calc(1.1 * var(--u)) var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--amarillo); }
+
+  .qr { display: flex; align-items: center; gap: calc(1.4 * var(--u)); padding: calc(1.2 * var(--u)); border-radius: calc(1 * var(--u)); background: rgba(255,255,255,.96); color: #1a0630; box-shadow: 0 0 calc(4 * var(--u)) rgba(255, 50, 102, .35); }
+  .qr .codigo-qr { width: calc(11 * var(--u)); height: calc(11 * var(--u)); }
+  .qr .codigo-qr svg { width: 100%; height: 100%; display: block; }
+  .qr .txt { font: 700 calc(1.7 * var(--u))/1.15 var(--titulo); text-transform: uppercase; letter-spacing: .04em; max-width: calc(14 * var(--u)); }
+  .qr .txt small { display: block; margin-top: calc(.8 * var(--u)); font: calc(1.1 * var(--u)) var(--mono); letter-spacing: .08em; color: #5a4a7a; text-transform: none; }
+
+  /* Cartel de fotos recien salidas */
+  .recien { position: absolute; top: calc(8 * var(--u)); left: 50%; z-index: 6; transform: translate(-50%, -200%); opacity: 0; transition: transform .8s cubic-bezier(.2,1.3,.4,1), opacity .5s;
+    padding: calc(1.4 * var(--u)) calc(3.2 * var(--u)); border-radius: 99px; background: var(--zing); color: #1a0630; text-align: center; white-space: nowrap;
+    font: 700 calc(2.6 * var(--u)) var(--titulo); letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 0 calc(5 * var(--u)) rgba(255, 50, 102, .7); }
+  .recien.on { transform: translate(-50%, 0); opacity: 1; }
+  .recien small { display: block; font: calc(1.2 * var(--u)) var(--mono); letter-spacing: .2em; opacity: .75; }
+
+  /* ---------- Placa (sin fotos, pausa, codigo, fin) ---------- */
+  .placa { position: absolute; inset: 0; z-index: 8; display: flex; align-items: center; justify-content: center; gap: calc(7 * var(--u)); padding: calc(5 * var(--u));
+    background: radial-gradient(50% 60% at 15% 20%, rgba(255,122,0,.25), transparent 70%), radial-gradient(55% 60% at 90% 30%, rgba(213,13,126,.3), transparent 70%), radial-gradient(80% 60% at 50% 110%, rgba(33,0,117,.95), transparent 70%), var(--vacio);
+    transition: opacity 1s; }
+  .placa.fuera { opacity: 0; pointer-events: none; }
+  .placa .lado { max-width: calc(48 * var(--u)); }
+  .placa .logo { width: calc(26 * var(--u)); filter: drop-shadow(0 0 calc(3 * var(--u)) rgba(255,50,102,.6)); animation: flotar 5s ease-in-out infinite; }
+  @keyframes flotar { 50% { transform: translateY(calc(-1 * var(--u))); } }
+  .placa h1 { margin: calc(2 * var(--u)) 0 calc(1 * var(--u)); font: 700 calc(4.6 * var(--u))/1 var(--titulo); text-transform: uppercase; }
+  .placa p { margin: 0; font: calc(1.9 * var(--u))/1.4 "Barlow", sans-serif; color: var(--suave); }
+  .placa .qr { flex-direction: column; text-align: center; padding: calc(2 * var(--u)); }
+  .placa .qr .codigo-qr { width: calc(24 * var(--u)); height: calc(24 * var(--u)); }
+  .placa .qr .txt { max-width: none; font-size: calc(2.2 * var(--u)); }
+  .placa form { display: flex; gap: calc(1 * var(--u)); margin-top: calc(3 * var(--u)); }
+  .placa input { width: calc(26 * var(--u)); padding: calc(1.2 * var(--u)); border-radius: calc(.6 * var(--u)); border: 1px solid rgba(255,122,150,.4); background: rgba(10,5,35,.7); color: var(--texto); outline: none;
+    font: 700 calc(3 * var(--u)) var(--titulo); letter-spacing: .35em; text-align: center; }
+  .placa button { padding: 0 calc(2.4 * var(--u)); border: 0; border-radius: calc(.6 * var(--u)); background: var(--zing); color: #1a0630; cursor: pointer; font: 700 calc(1.8 * var(--u)) var(--titulo); letter-spacing: .1em; text-transform: uppercase; }
+  .placa .error { margin-top: calc(1 * var(--u)); color: #ff4d5e; font: calc(1.3 * var(--u)) var(--mono); min-height: calc(2 * var(--u)); }
+
+  .ayuda { position: fixed; z-index: 20; left: 50%; bottom: calc(2 * var(--u)); transform: translateX(-50%); padding: calc(.9 * var(--u)) calc(2 * var(--u)); border-radius: 99px; background: rgba(7,3,26,.85); border: 1px solid rgba(255,122,150,.35);
+    font: calc(1.2 * var(--u)) var(--mono); letter-spacing: .1em; color: var(--suave); transition: opacity .6s; }
+  body.quieto .ayuda { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) { .capa.on .foto img { animation: none; } }
+</style>
+</head>
+<body>
+<div id="escena"><div class="capa" id="capa-a"><div class="fondo"></div><div class="foto"><img alt="" /></div></div><div class="capa" id="capa-b"><div class="fondo"></div><div class="foto"><img alt="" /></div></div></div>
+<div class="mosaico" id="mosaico" hidden></div>
+
+<div class="info" id="info" hidden>
+  <div class="arriba"><span class="vivo"><i></i>En vivo</span><span class="cuenta" id="cuenta"></span></div>
+  <div class="abajo">
+    <div class="momento">
+      <div class="de-invitado" id="de-invitado" hidden>📸 Foto de un invitado</div>
+      <div class="que gradiente" id="que"></div>
+      <div class="linea"></div>
+      <div class="evento"><img src="/logo.png" alt="Zing" /><span id="evento"></span></div>
+    </div>
+    <div class="qr"><div class="codigo-qr" id="qr-chico"></div><div class="txt">Escaneá y llevate tus fotos<small id="codigo-chico"></small></div></div>
+  </div>
+</div>
+<div class="recien" id="recien"></div>
+
+<div class="placa" id="placa">
+  <div class="lado">
+    <img class="logo" src="/logo.png" alt="Zing" />
+    <h1 class="gradiente" id="p-titulo">Pantalla en vivo</h1>
+    <p id="p-texto">Cargando…</p>
+    <form id="f-codigo" hidden>
+      <input id="codigo" inputmode="numeric" maxlength="6" placeholder="······" aria-label="Código del evento" />
+      <button>Entrar</button>
+    </form>
+    <div class="error" id="e-codigo"></div>
+  </div>
+  <div class="qr" id="p-qr" hidden><div class="codigo-qr" id="qr-grande"></div><div class="txt">Escaneá y llevate tus fotos<small id="codigo-grande"></small></div></div>
+</div>
+<div class="ayuda" id="ayuda">Hacé clic para pantalla completa</div>
+
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+// Pantalla gigante del salon: pasa las fotos de la noche a medida que Zing las
+// edita, destaca las recien salidas y muestra el QR para que la gente entre.
+// Link: /pantalla.html?e=<slug>&c=<codigo> (lo abre la app de Zing).
+const $ = (id) => document.getElementById(id);
+const sb = supabase.createClient(ZING.supabaseUrl, ZING.supabaseKey, { auth: { persistSession: false } });
+const params = new URLSearchParams(location.search);
+const slug = params.get("e") || "";
+const SEGUNDOS = 7, CADA_MOSAICO = 11, AGRUPAR_MS = 4000;
+
+let ev = null, codigo = params.get("c") || "";
+const fotos = new Map(); // id -> foto
+let cola = [], ronda = [], ultimoId = 0, pasadas = 0, actual = null, pausada = false, reloj = null, capaA = true;
+
+const url = (path) => sb.storage.from("galerias").getPublicUrl(path).data.publicUrl;
+const visible = (f) => f.origen === "zing" || f.en_pantalla;
+const nombreMomento = (c) => ev.momentos.find((m) => m.carpeta === c)?.nombre || "";
+const mezclar = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+function qr(el, texto) {
+  const q = qrcode(0, "M"); q.addData(texto); q.make();
+  el.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+}
+
+// --- Placa: cargando / codigo / sin fotos / pausa / fin -----------------------
+function placa(titulo, texto, { conQR = false, pedirCodigo = false } = {}) {
+  $("p-titulo").textContent = titulo; $("p-texto").textContent = texto;
+  $("p-qr").hidden = !conQR; $("f-codigo").hidden = !pedirCodigo;
+  $("placa").classList.remove("fuera"); $("info").hidden = true;
+}
+function sacarPlaca() { $("placa").classList.add("fuera"); $("info").hidden = false; }
+
+// --- Entrar -----------------------------------------------------------------
+async function entrar() {
+  const { data, error } = await sb.rpc("galeria_entrar", { p_slug: slug, p_codigo: codigo });
+  if (error) { placa("Sin conexión", "Reintentando…"); return setTimeout(entrar, 10000); }
+  if (data.error === "terminado") return placa("¡Gracias!", "La galería de este evento ya cerró.");
+  if (data.error) {
+    placa("Pantalla en vivo", "Ingresá el código del evento.", { pedirCodigo: true });
+    if (codigo) $("e-codigo").textContent = data.error === "intentos" ? "Demasiados intentos. Esperá unos minutos." : "El código no es correcto.";
+    return $("codigo").focus();
+  }
+  ev = data; pausada = !!ev.pantalla_pausada;
+  document.title = `${ev.nombre} · Pantalla Zing`;
+  $("evento").textContent = ev.nombre;
+  const link = `${location.origin}/${slug}?c=${codigo}`;
+  qr($("qr-chico"), link); qr($("qr-grande"), link);
+  $("codigo-chico").textContent = $("codigo-grande").textContent = `${location.host}/${slug} · código ${codigo}`;
+  if (ev.pack !== "galeria") return placa(ev.nombre, "La pantalla en vivo viene con el pack Galería virtual.", { conQR: true });
+  await cargar(0);
+  sb.channel("galeria-" + ev.token)
+    .on("broadcast", { event: "foto" }, ({ payload }) => recibir(payload, true))
+    .on("broadcast", { event: "pantalla" }, ({ payload }) => { pausada = payload.pausada; siguiente(true); })
+    .subscribe();
+  setInterval(() => cargar(ultimoId), 60000); // por si se corta el canal en vivo
+  setInterval(refrescarEvento, 5 * 60000);
+  siguiente(true);
+}
+$("f-codigo").onsubmit = (e) => { e.preventDefault(); codigo = $("codigo").value.replace(/\D/g, ""); $("e-codigo").textContent = ""; entrar(); };
+
+async function refrescarEvento() {
+  const { data } = await sb.rpc("galeria_entrar", { p_slug: slug, p_codigo: codigo });
+  if (!data) return;
+  if (data.error === "terminado") { clearTimeout(reloj); return placa("¡Gracias!", "La galería de este evento ya cerró."); }
+  if (!data.error && data.pantalla_pausada !== pausada) { pausada = data.pantalla_pausada; siguiente(true); }
+  // Rehace la lista completa: toma fotos ocultadas o aprobadas mientras el canal estuvo caido.
+  const { data: todas } = await sb.rpc("galeria_listar", { p_token: ev.token, p_desde: 0 });
+  if (todas) { const ids = new Set(todas.map((f) => f.id)); [...fotos.keys()].forEach((id) => !ids.has(id) && fotos.delete(id)); todas.forEach((f) => recibir(f, false)); }
+}
+
+async function cargar(desde) {
+  const { data } = await sb.rpc("galeria_listar", { p_token: ev.token, p_desde: desde });
+  (data || []).forEach((f) => recibir(f, desde > 0));
+}
+
+// --- Fotos que llegan -------------------------------------------------------
+let tanda = [], tandaReloj = null;
+function recibir(f, enVivo) {
+  ultimoId = Math.max(ultimoId, f.id);
+  const antes = fotos.get(f.id);
+  if (f.oculta) { fotos.delete(f.id); cola = cola.filter((id) => id !== f.id); return; }
+  fotos.set(f.id, { ...antes, ...f });
+  const recienVisible = visible(f) && (!antes || !visible(antes));
+  if (!recienVisible || !enVivo) return;
+  // Lo nuevo pasa primero; si llegan varias juntas, un solo cartel por tanda.
+  cola.push(f.id);
+  tanda.push(f);
+  clearTimeout(tandaReloj);
+  tandaReloj = setTimeout(() => { anunciar(tanda); tanda = []; }, AGRUPAR_MS);
+  if (!actual) siguiente(true);
+}
+function anunciar(lista) {
+  if (!lista.length || pausada) return;
+  const zing = lista.filter((f) => f.origen === "zing");
+  const titulo = zing.length ? "¡Recién salidas!" : "¡Nueva foto de un invitado!";
+  const momento = zing.length ? nombreMomento(zing[zing.length - 1].momento) : "";
+  $("recien").innerHTML = `${titulo}<small>${momento ? momento.toUpperCase() + " · " : ""}${lista.length} ${lista.length === 1 ? "FOTO" : "FOTOS"}</small>`;
+  $("recien").classList.add("on");
+  setTimeout(() => $("recien").classList.remove("on"), 6000);
+}
+
+// --- Reproduccion -----------------------------------------------------------
+function proxima() {
+  while (cola.length) { const f = fotos.get(cola.shift()); if (f && visible(f)) return f; }
+  const lista = [...fotos.values()].filter(visible);
+  if (!lista.length) return null;
+  ronda = ronda.filter((id) => fotos.has(id));
+  if (!ronda.length) {
+    ronda = mezclar(lista.map((f) => f.id));
+    if (ronda.length > 1 && ronda[0] === actual?.id) ronda.push(ronda.shift()); // no repetir la que se esta viendo
+  }
+  return fotos.get(ronda.shift()) || lista[0];
+}
+
+async function siguiente(ahora = false) {
+  clearTimeout(reloj);
+  const cuantas = [...fotos.values()].filter(visible).length;
+  $("cuenta").textContent = `${cuantas} ${cuantas === 1 ? "foto" : "fotos"}`;
+  if (pausada) { actual = null; return placa(ev.nombre, "En un ratito vuelven las fotos. ¡Mientras, escaneá y llevate las tuyas!", { conQR: true }); }
+  if (!cuantas) { actual = null; return placa(ev.nombre, "Las fotos de la noche van a aparecer acá.", { conQR: true }); }
+  pasadas++;
+  if (!cola.length && cuantas >= 6 && pasadas % CADA_MOSAICO === 0) await mosaico();
+  else await mostrar(proxima());
+  reloj = setTimeout(siguiente, SEGUNDOS * 1000);
+}
+
+function cargarImagen(src) {
+  return new Promise((ok) => {
+    const img = new Image(); let listo = false;
+    const fin = (r) => { if (!listo) { listo = true; ok(r); } };
+    img.onload = () => (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(() => fin(img));
+    img.onerror = () => fin(null);
+    setTimeout(() => fin(null), 10000);
+    img.src = src;
+  });
+}
+
+async function mostrar(f) {
+  if (!f) return;
+  const img = await cargarImagen(url(f.path));
+  if (!img) { fotos.get(f.id) && (f.fallas = (f.fallas || 0) + 1); return; }
+  actual = f;
+  const capa = $(capaA ? "capa-a" : "capa-b"), otra = $(capaA ? "capa-b" : "capa-a");
+  capaA = !capaA;
+  const horizontal = img.naturalWidth / img.naturalHeight > 1.25;
+  capa.classList.toggle("llena", horizontal);
+  capa.querySelector(".fondo").style.backgroundImage = `url("${img.src}")`;
+  const el = capa.querySelector("img");
+  el.src = img.src;
+  // Zoom lento con punto y sentido al azar, para que cada foto se mueva distinto.
+  const acercar = Math.random() > .35;
+  el.style.setProperty("--ox", 30 + Math.random() * 40 + "%");
+  el.style.setProperty("--oy", 25 + Math.random() * 40 + "%");
+  el.style.setProperty("--z0", acercar ? 1 : 1.09);
+  el.style.setProperty("--z1", acercar ? 1.09 : 1);
+  el.style.setProperty("--dura", SEGUNDOS + 2 + "s");
+  el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
+  $("mosaico").hidden = true;
+  capa.classList.add("on"); otra.classList.remove("on");
+  sacarPlaca();
+  const momento = f.origen === "zing" ? nombreMomento(f.momento) : "";
+  $("que").textContent = momento || ev.nombre;
+  $("de-invitado").hidden = f.origen !== "invitado";
+}
+
+async function mosaico() {
+  const elegidas = mezclar([...fotos.values()].filter(visible)).slice(0, 5);
+  const imgs = (await Promise.all(elegidas.map((f) => cargarImagen(url(f.path))))).filter(Boolean);
+  if (imgs.length < 5) return mostrar(proxima());
+  $("mosaico").innerHTML = imgs.map((img, i) => `<div style="background-image:url('${img.src}');animation-delay:${i * 120}ms"></div>`).join("");
+  $("mosaico").hidden = false;
+  document.querySelectorAll(".capa").forEach((c) => c.classList.remove("on"));
+  $("que").textContent = ev.nombre; $("de-invitado").hidden = true;
+  sacarPlaca();
+}
+
+// --- Pantalla completa, cursor y que no se apague -----------------------------
+document.addEventListener("click", (e) => {
+  if (e.target.closest("form")) return;
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {});
+});
+let quieto = null;
+const mover = () => { document.body.classList.remove("quieto"); clearTimeout(quieto); quieto = setTimeout(() => document.body.classList.add("quieto"), 3000); };
+document.addEventListener("mousemove", mover); mover();
+setTimeout(() => $("ayuda").remove(), 15000);
+let despierto = null;
+async function noApagar() { try { despierto = await navigator.wakeLock?.request("screen"); } catch {} }
+document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && noApagar());
+noApagar();
+
+if (!slug) placa("Pantalla en vivo", "Abrí la pantalla desde la app de Zing.");
+else if (!codigo) placa("Pantalla en vivo", "Ingresá el código del evento.", { pedirCodigo: true });
+else entrar();
+</script>
+</body>
+</html>
