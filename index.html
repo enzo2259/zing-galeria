@@ -366,7 +366,11 @@ $("v-bajar").onclick = async () => {
 };
 
 // --- Subir fotos de invitados ----------------------------------------------
-$("b-subir").onclick = () => $("archivos").click();
+// Galerias de demostracion (las que se muestran en la web de Zing): se puede tocar todo, pero no se sube nada.
+const DEMO = slug.startsWith("demo-");
+$("b-subir").onclick = () => DEMO
+  ? aviso("<b>Esta es una galería de demostración.</b><br>En tu fiesta, acá tus invitados suben sus fotos y aparecen al instante.")
+  : $("archivos").click();
 $("archivos").onchange = async (e) => {
   const archivos = [...e.target.files].filter((f) => f.type.startsWith("image/") || /\.(jpe?g|png|heic|heif|webp)$/i.test(f.name));
   e.target.value = "";
