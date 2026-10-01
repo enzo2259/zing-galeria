@@ -92,6 +92,12 @@
   footer img { height: 22px; margin: 0 auto 10px; display: block; opacity: .9; }
   .aviso-demo { position: fixed; z-index: 30; top: 0; left: 0; right: 0; padding: 7px 12px; text-align: center; font: 600 11px var(--sans); color: #2a1420; background: linear-gradient(90deg, var(--oro), var(--rosa)); }
 
+  /* ---------- Selector de color (en la real lo elige la familia al configurar) ---------- */
+  .colores { position: fixed; z-index: 25; left: 12px; bottom: calc(16px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 99px;
+    background: rgba(18,10,20,.6); border: 1px solid var(--borde); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); max-width: calc(100vw - 190px); overflow-x: auto; }
+  .colores small { font: 600 10px var(--sans); letter-spacing: .08em; color: var(--suave); white-space: nowrap; margin-right: 2px; }
+  .colores button { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); cursor: pointer; }
+  .colores button.on { border-color: #fff; transform: scale(1.15); }
   .rev { opacity: 0; transform: translateY(18px); transition: opacity .9s, transform .9s; }
   .rev.ve { opacity: 1; transform: none; }
   @media (prefers-reduced-motion: reduce) { .fotos div.on { animation: none; } .rev { opacity: 1; transform: none; } }
@@ -116,6 +122,7 @@
   <a class="bajar" href="#invitacion">Deslizá ↓</a>
 </header>
 
+<div class="colores" id="colores"><small>Color del vestido</small></div>
 <button class="musica" id="musica" type="button" aria-label="Reproducir música">
   <span class="ico" id="m-ico">▶</span><span id="m-txt">Nuestra canción</span><span class="ondas"><i></i><i></i><i></i></span>
 </button>
@@ -254,6 +261,23 @@ const pintar = (t, f, arriba) => { const m = document.createElement("div"); m.cl
  ["Amiga, gracias por tantos años juntas. ¡A bailar hasta que nos echen!", "Cami"],
  ["Sos nuestro orgullo. Te amamos infinito.", "Mamá y Papá"]].forEach(([t, f]) => pintar(t, f));
 document.getElementById("f-msg").onsubmit = (e) => { e.preventDefault(); const f = new FormData(e.target); pintar(f.get("texto"), f.get("firma"), true); e.target.reset(); };
+
+// Color del vestido: la página se adapta (en la real lo elige la familia)
+const VESTIDOS = { "Rosa": "#e9a3b4", "Celeste": "#8ec5ef", "Lila": "#c3a6e6", "Rojo": "#e0525f", "Dorado": "#e8c48a",
+  "Fucsia": "#e0479e", "Azul": "#5b8fe6", "Verde": "#5fc49d", "Blanco": "#f1e7d6" };
+function hsl(hex) { let [r, g, b] = [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16) / 255); const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, l = (mx + mn) / 2, s = 0;
+  if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; } return [h, s * 100, l * 100]; }
+function vestido(hex) {
+  const [h, s] = hsl(hex), raiz = document.documentElement.style;
+  raiz.setProperty("--rosa", hex);
+  raiz.setProperty("--oro", `hsl(${(h + 25) % 360} ${Math.min(70, s + 10)}% 78%)`);
+  raiz.setProperty("--fondo", `hsl(${h} ${Math.min(45, s)}% 6%)`);
+  document.body.style.background = `hsl(${h} ${Math.min(45, s)}% 6%)`;
+}
+const sel = document.getElementById("colores");
+Object.entries(VESTIDOS).forEach(([n, c], k) => { const b = document.createElement("button"); b.type = "button"; b.title = n; b.style.background = c; if (!k) b.className = "on";
+  b.onclick = () => { sel.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); vestido(c); }; sel.appendChild(b); });
+vestido(VESTIDOS.Rosa);
 
 // Aparecer al bajar
 const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { x.target.classList.add("ve"); io.unobserve(x.target); } }), { threshold: .12 });
