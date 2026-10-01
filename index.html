@@ -417,10 +417,25 @@ async function subirUna(archivo) {
 }
 
 // --- Arranque ---------------------------------------------------------------
+const cargarScript = (src) => new Promise((ok, mal) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = mal; document.head.appendChild(s); });
+
 (async () => {
   if (!slug) return mensaje("Zing <span class='gradiente'>Fotos</span>", "Escaneá el QR del evento para ver las fotos.");
+  // Panel de la familia (link privado para configurar la invitacion)
+  if (params.has("editar")) {
+    await cargarScript("/invitacion.js"); await cargarScript("/familia.js");
+    return window.ZingFamilia.iniciar();
+  }
   const codigo = params.get("c") || guardado.get();
-  if (codigo) await entrar(codigo, false); else pantalla("p-codigo");
+  if (codigo) return entrar(codigo, false);
+  // Sin codigo: si el evento tiene invitacion, el link es la invitacion hasta que abre la galeria.
+  const { data } = await sb.rpc("galeria_invitacion", { p_slug: slug });
+  if (data && !data.error) {
+    if (data.galeria_abierta && data.codigo) return entrar(data.codigo, false);
+    await cargarScript("/invitacion.js");
+    return window.ZingInvitacion.render(data);
+  }
+  pantalla("p-codigo");
 })();
 </script>
 </body>
