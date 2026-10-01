@@ -59,6 +59,7 @@
   /* ---------- Galeria ---------- */
   header { position: sticky; top: 0; z-index: 10; padding: calc(10px + env(safe-area-inset-top)) 16px 0;
     background: linear-gradient(180deg, rgba(7,3,26,.96) 70%, rgba(7,3,26,.75)); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .nota-demo { margin: 0 0 12px; padding: 8px 12px; border-radius: 10px; font-size: 12px; line-height: 1.35; color: var(--suave); background: rgba(255, 255, 255, .05); border: 1px solid var(--linea); }
   .barra-sup { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .barra-sup img { height: 30px; filter: drop-shadow(0 0 10px rgba(255, 50, 102, .45)); }
   .vivo { display: inline-flex; align-items: center; gap: 7px; font: 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ok); }
@@ -368,6 +369,12 @@ $("v-bajar").onclick = async () => {
 // --- Subir fotos de invitados ----------------------------------------------
 // Galerias de demostracion (las que se muestran en la web de Zing): se puede tocar todo, pero no se sube nada.
 const DEMO = slug.startsWith("demo-");
+if (DEMO) {
+  const n = document.createElement("div");
+  n.className = "nota-demo";
+  n.textContent = "🔒 Galería de demostración: por confidencialidad de nuestros clientes, las fotos fueron creadas con IA.";
+  $("p-galeria").querySelector("header").prepend(n);
+}
 $("b-subir").onclick = () => DEMO
   ? aviso("<b>Esta es una galería de demostración.</b><br>En tu fiesta, acá tus invitados suben sus fotos y aparecen al instante.")
   : $("archivos").click();
