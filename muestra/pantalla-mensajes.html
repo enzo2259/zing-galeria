@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pantalla con mensajes · Muestra Zing</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,600;1,400;1,500&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: #07030c; color: #fff; }
+  :root { --u: min(1vw, 1.78vh); }
+  .foto { position: fixed; inset: -4%; background-size: cover; background-position: center; opacity: 0; transition: opacity 2s ease; }
+  .foto.on { opacity: 1; animation: lento 12s linear both; }
+  @keyframes lento { from { transform: scale(1.1); } to { transform: scale(1.02); } }
+  .velo { position: fixed; inset: 0; background: radial-gradient(70% 60% at 50% 55%, rgba(7,3,12,.15), rgba(7,3,12,.7)); }
+
+  .mensaje { position: fixed; left: 50%; top: 50%; width: min(78vw, 120 * var(--u)); transform: translate(-50%, -50%) translateY(2vh); opacity: 0;
+    padding: calc(4.5 * var(--u)) calc(6 * var(--u)) calc(4 * var(--u)); border-radius: calc(3.5 * var(--u)); text-align: center;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.3); backdrop-filter: blur(22px) saturate(1.2); -webkit-backdrop-filter: blur(22px) saturate(1.2);
+    box-shadow: 0 calc(3 * var(--u)) calc(10 * var(--u)) rgba(0,0,0,.35); transition: opacity 1.2s ease, transform 1.2s ease; }
+  .mensaje.on { opacity: 1; transform: translate(-50%, -50%); }
+  .mensaje .comillas { font-family: "Cormorant Garamond", serif; font-size: calc(9 * var(--u)); line-height: .6; color: #e8c48a; }
+  .mensaje p { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500; font-size: calc(4.4 * var(--u)); line-height: 1.25; text-shadow: 0 2px 20px rgba(0,0,0,.3); }
+  .mensaje span { display: block; margin-top: calc(2.2 * var(--u)); font-family: "Great Vibes", cursive; font-size: calc(5.2 * var(--u)); color: #e8c48a; }
+
+  .cabeza { position: fixed; top: calc(3 * var(--u)); left: calc(3.5 * var(--u)); right: calc(3.5 * var(--u)); display: flex; justify-content: space-between; align-items: center; }
+  .cabeza .nombre { font-family: "Great Vibes", cursive; font-size: calc(5 * var(--u)); text-shadow: 0 2px 20px rgba(0,0,0,.5); }
+  .cabeza .tag { padding: calc(1 * var(--u)) calc(2 * var(--u)); border-radius: 99px; font: 700 calc(1.3 * var(--u)) "Montserrat", sans-serif; letter-spacing: .2em; text-transform: uppercase;
+    background: rgba(7,3,12,.5); border: 1px solid rgba(255,255,255,.2); backdrop-filter: blur(10px); }
+  .pie { position: fixed; left: calc(3.5 * var(--u)); right: calc(3.5 * var(--u)); bottom: calc(3 * var(--u)); display: flex; justify-content: space-between; align-items: flex-end; }
+  .pie img { height: calc(4.5 * var(--u)); filter: drop-shadow(0 0 12px rgba(255,79,123,.5)); }
+  .pie .qr { display: flex; align-items: center; gap: calc(1.4 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.8 * var(--u)); border-radius: calc(1.4 * var(--u)); background: rgba(255,255,255,.92); color: #2a1420;
+    font: 700 calc(1.5 * var(--u))/1.25 "Montserrat", sans-serif; }
+  .pie .qr i { width: calc(7 * var(--u)); height: calc(7 * var(--u)); border-radius: 6px;
+    background: repeating-conic-gradient(#2a1420 0 25%, #fff 0 50%) 0 0 / calc(1.2 * var(--u)) calc(1.2 * var(--u)); }
+  .aviso { position: fixed; top: 0; left: 50%; transform: translateX(-50%); padding: 6px 14px; border-radius: 0 0 10px 10px; font: 600 11px "Montserrat", sans-serif; color: #2a1420; background: #e8c48a; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="fotos"></div>
+<div class="velo"></div>
+<div class="mensaje" id="mensaje"><div class="comillas">“</div><p id="m-texto"></p><span id="m-firma"></span></div>
+<div class="cabeza"><div class="nombre">Mis XV · Martina</div><div class="tag">💌 Mensajes para Martina</div></div>
+<div class="pie"><img src="https://fotos.zingproducciones.com/logo.png" alt="Zing"><div class="qr"><i></i><div>Escaneá y dejale<br>tu mensaje</div></div></div>
+<div class="aviso">Muestra · fotos de ejemplo creadas con IA</div>
+<script>
+const EJ = n => `https://fotos.zingproducciones.com/ejemplos/ejemplo-${String(n).padStart(2, "0")}.jpg`;
+const FOTOS = [1, 9, 2, 13, 12, 14].map(EJ);
+const MENSAJES = [
+  ["Te vi crecer y hoy te veo brillar. ¡Que sea la noche más linda de tu vida!", "Tía Ana"],
+  ["Amiga, gracias por tantos años juntas. ¡A bailar hasta que nos echen!", "Cami"],
+  ["Sos nuestro orgullo. Te amamos infinito.", "Mamá y Papá"],
+  ["Que esta noche sea el comienzo de todos tus sueños.", "Abuela Rosa"],
+  ["¡Feliz 15, prima! Sos la más linda de la fiesta.", "Juli"],
+];
+const caja = document.getElementById("fotos");
+FOTOS.forEach(u => { const d = document.createElement("div"); d.className = "foto"; d.style.backgroundImage = `url("${u}")`; caja.appendChild(d); });
+const fotos = caja.children, msj = document.getElementById("mensaje");
+let i = 0;
+function siguiente() {
+  msj.classList.remove("on");
+  setTimeout(() => {
+    [...fotos].forEach((f, k) => f.classList.toggle("on", k === i % fotos.length));
+    const [t, f] = MENSAJES[i % MENSAJES.length];
+    document.getElementById("m-texto").textContent = t; document.getElementById("m-firma").textContent = f;
+    msj.classList.add("on"); i++;
+  }, 900);
+}
+siguiente(); setInterval(siguiente, 8000);
+</script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mis XV · Martina — Invitación</title>
+<meta name="description" content="Te invito a celebrar mis 15. Sábado 14 de noviembre, 21 h.">
+<meta property="og:title" content="Mis XV · Martina">
+<meta property="og:description" content="Te invito a celebrar mis 15. Sábado 14 de noviembre, 21 h.">
+<meta property="og:image" content="https://fotos.zingproducciones.com/ejemplos/ejemplo-12.jpg">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,500&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fondo: #120a14; --tinta: #fff8f3; --suave: rgba(255,248,243,.72); --tenue: rgba(255,248,243,.5);
+    --oro: #e8c48a; --rosa: #e9a3b4; --vidrio: rgba(255,255,255,.09); --borde: rgba(255,255,255,.22);
+    --nombre: "Great Vibes", cursive; --serif: "Cormorant Garamond", Georgia, serif; --sans: "Montserrat", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--fondo); color: var(--tinta); font-family: var(--serif); font-size: 19px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+
+  /* ---------- PORTADA con las fotos del book ---------- */
+  .portada { position: relative; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 22px 40px; overflow: hidden; }
+  .fotos { position: absolute; inset: 0; }
+  .fotos div { position: absolute; inset: -4%; background-size: cover; background-position: center 30%; opacity: 0; transition: opacity 2.2s ease; }
+  .fotos div.on { opacity: 1; animation: lento 11s linear both; }
+  @keyframes lento { from { transform: scale(1.12) translateY(1.5%); } to { transform: scale(1.02) translateY(-1.5%); } }
+  .portada::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(18,10,20,.55) 0%, rgba(18,10,20,.25) 35%, rgba(18,10,20,.75) 78%, var(--fondo) 100%); }
+  .portada > *:not(.fotos) { position: relative; z-index: 1; }
+  .mis { font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: .5em; text-transform: uppercase; color: var(--oro); padding-left: .5em; }
+  .nombre { font-family: var(--nombre); font-weight: 400; font-size: clamp(84px, 24vw, 150px); line-height: .95; margin: 10px 0 6px; text-shadow: 0 6px 40px rgba(0,0,0,.45); }
+  .fecha { font-size: 22px; font-style: italic; color: var(--suave); }
+  .cuenta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 34px; width: min(100%, 400px); }
+  .cuenta div { padding: 14px 4px 10px; border-radius: 18px; background: var(--vidrio); border: 1px solid var(--borde); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .cuenta b { display: block; font-family: var(--serif); font-weight: 600; font-size: 34px; line-height: 1; }
+  .cuenta small { font-family: var(--sans); font-size: 9.5px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--suave); }
+  .bajar { margin-top: 30px; font-family: var(--sans); font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--tenue); text-decoration: none; animation: flota 2.4s ease-in-out infinite; }
+  @keyframes flota { 50% { transform: translateY(6px); } }
+
+  /* ---------- Botón de música ---------- */
+  .musica { position: fixed; z-index: 20; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 9px; padding: 11px 16px 11px 12px; border-radius: 99px; border: 1px solid var(--borde);
+    background: rgba(18,10,20,.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: var(--tinta); font: 600 12px var(--sans); letter-spacing: .06em; cursor: pointer; }
+  .musica .ico { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--oro), var(--rosa)); color: #2a1420; font-size: 12px; }
+  .musica .ondas { display: none; gap: 2px; align-items: flex-end; height: 14px; }
+  .musica.sonando .ondas { display: flex; }
+  .musica .ondas i { width: 3px; background: var(--oro); border-radius: 2px; animation: onda 1s ease-in-out infinite; }
+  .musica .ondas i:nth-child(2) { animation-delay: .2s; } .musica .ondas i:nth-child(3) { animation-delay: .4s; }
+  @keyframes onda { 0%,100% { height: 4px; } 50% { height: 14px; } }
+
+  /* ---------- Secciones ---------- */
+  section.bloque { padding: 70px 22px; max-width: 560px; margin: 0 auto; text-align: center; }
+  .frase { font-size: 26px; font-style: italic; line-height: 1.35; color: var(--suave); }
+  .frase b { font-family: var(--nombre); font-weight: 400; font-style: normal; font-size: 40px; color: var(--tinta); display: block; margin-top: 10px; }
+  .titulo { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .4em; text-transform: uppercase; color: var(--oro); margin-bottom: 14px; }
+  .tarjeta { margin-top: 18px; padding: 28px 22px; border-radius: 26px; background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border: 1px solid var(--borde); }
+  .tarjeta h3 { font-size: 30px; font-weight: 600; line-height: 1.15; }
+  .tarjeta p { color: var(--suave); margin-top: 6px; }
+  .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 20px; border-radius: 99px; border: 1px solid var(--borde); background: var(--vidrio); color: var(--tinta); font: 600 13px var(--sans); letter-spacing: .04em; text-decoration: none; cursor: pointer; }
+  .btn.oro { border: 0; background: linear-gradient(135deg, var(--oro), var(--rosa)); color: #2a1420; }
+  .separador { width: 60px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--oro), transparent); }
+  .alias { margin-top: 14px; font-family: var(--sans); font-weight: 700; font-size: 16px; letter-spacing: .04em; }
+
+  /* ---------- Formularios ---------- */
+  form { margin-top: 18px; display: grid; gap: 12px; text-align: left; }
+  label { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .06em; color: var(--suave); }
+  input, select, textarea { width: 100%; margin-top: 6px; padding: 13px 15px; border-radius: 14px; border: 1px solid var(--borde); background: rgba(255,255,255,.06); color: var(--tinta); font: 16px var(--sans); outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--oro); }
+  select option { color: #222; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .gracias { display: none; margin-top: 18px; padding: 20px; border-radius: 18px; background: rgba(232,196,138,.12); border: 1px solid rgba(232,196,138,.4); font-size: 20px; }
+
+  /* ---------- Muro de mensajes ---------- */
+  .muro { position: relative; margin-top: 22px; border-radius: 26px; overflow: hidden; min-height: 300px; }
+  .muro .fondo { position: absolute; inset: 0; background-size: cover; background-position: center; filter: saturate(.9); }
+  .muro::after { content: ""; position: absolute; inset: 0; background: rgba(18,10,20,.45); }
+  .muro .msgs { position: relative; z-index: 1; display: grid; gap: 12px; padding: 22px; }
+  .msg { padding: 18px 20px; border-radius: 20px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); text-align: left; animation: entra .6s ease both; }
+  .msg p { font-size: 21px; font-style: italic; line-height: 1.35; }
+  .msg span { display: block; margin-top: 6px; font-family: var(--nombre); font-size: 26px; color: var(--oro); }
+  @keyframes entra { from { opacity: 0; transform: translateY(10px); } }
+
+  /* ---------- Galería que viene ---------- */
+  .galeria { padding: 26px 22px; border-radius: 26px; border: 1px dashed rgba(232,196,138,.5); background: rgba(232,196,138,.06); }
+  .galeria b { font-size: 24px; }
+
+  footer { padding: 50px 22px calc(100px + env(safe-area-inset-bottom)); text-align: center; font-family: var(--sans); font-size: 11px; color: var(--tenue); line-height: 1.7; }
+  footer img { height: 22px; margin: 0 auto 10px; display: block; opacity: .9; }
+  .aviso-demo { position: fixed; z-index: 30; top: 0; left: 0; right: 0; padding: 7px 12px; text-align: center; font: 600 11px var(--sans); color: #2a1420; background: linear-gradient(90deg, var(--oro), var(--rosa)); }
+
+  .rev { opacity: 0; transform: translateY(18px); transition: opacity .9s, transform .9s; }
+  .rev.ve { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .fotos div.on { animation: none; } .rev { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<div class="aviso-demo">Muestra de invitación digital de Zing · fotos de ejemplo creadas con IA</div>
+
+<!-- PORTADA: las fotos del book pasan de fondo -->
+<header class="portada">
+  <div class="fotos" id="fotos"></div>
+  <div class="mis">Mis XV</div>
+  <h1 class="nombre">Martina</h1>
+  <p class="fecha">Sábado 14 de noviembre · 21 h</p>
+  <div class="cuenta" id="cuenta">
+    <div><b id="c-d">0</b><small>Días</small></div>
+    <div><b id="c-h">0</b><small>Horas</small></div>
+    <div><b id="c-m">0</b><small>Min</small></div>
+    <div><b id="c-s">0</b><small>Seg</small></div>
+  </div>
+  <a class="bajar" href="#invitacion">Deslizá ↓</a>
+</header>
+
+<button class="musica" id="musica" type="button" aria-label="Reproducir música">
+  <span class="ico" id="m-ico">▶</span><span id="m-txt">Nuestra canción</span><span class="ondas"><i></i><i></i><i></i></span>
+</button>
+<audio id="audio" src="muestra-musica.mp3" loop preload="none"></audio>
+
+<section class="bloque rev" id="invitacion">
+  <p class="frase">Hay sueños que se esperan toda la vida, y noches que se recuerdan para siempre.
+    <b>Te espero para celebrarla</b></p>
+</section>
+
+<div class="separador"></div>
+
+<section class="bloque rev">
+  <div class="titulo">Cuándo y dónde</div>
+  <div class="tarjeta">
+    <h3>Sábado 14 de noviembre</h3>
+    <p>21 h · Salón de ejemplo<br>Córdoba</p>
+    <div class="botones">
+      <a class="btn oro" href="https://www.google.com/maps/search/?api=1&query=C%C3%B3rdoba%2C+Argentina" target="_blank" rel="noopener">📍 Cómo llegar</a>
+      <a class="btn" id="agendar" href="#" target="_blank" rel="noopener">🗓 Agendar</a>
+    </div>
+  </div>
+  <div class="tarjeta">
+    <div class="titulo" style="margin:0 0 6px">Vestimenta</div>
+    <h3>Elegante sport</h3>
+    <p>Venite cómodo para bailar toda la noche.</p>
+  </div>
+</section>
+
+<section class="bloque rev">
+  <div class="titulo">Regalo</div>
+  <p class="frase" style="font-size:22px">Tu presencia es mi mejor regalo. Si querés hacerme un obsequio, te dejo mis datos:</p>
+  <div class="tarjeta">
+    <p>Alias</p>
+    <div class="alias" id="alias">martina.xv.ejemplo</div>
+    <div class="botones"><button class="btn oro" type="button" id="copiar">Copiar alias</button></div>
+  </div>
+</section>
+
+<section class="bloque rev" id="confirmar">
+  <div class="titulo">Confirmá tu asistencia</div>
+  <p class="frase" style="font-size:22px">Antes del 31 de octubre, así te guardamos el lugar.</p>
+  <form id="f-rsvp">
+    <label>Tu nombre y apellido<input name="nombre" required placeholder="Ej: Sofía Pérez"></label>
+    <div class="dos">
+      <label>¿Venís?<select name="viene"><option>¡Sí, voy!</option><option>No puedo ir</option></select></label>
+      <label>¿Cuántos son?<input name="cuantos" type="number" min="1" max="10" value="1"></label>
+    </div>
+    <label>¿Alguna comida especial?<select name="menu"><option>No</option><option>Celíaco</option><option>Vegetariano</option><option>Vegano</option><option>Otra</option></select></label>
+    <label>🎵 ¿Qué canción no puede faltar?<input name="cancion" placeholder="Se la pasamos al DJ"></label>
+    <button class="btn oro" type="submit" style="justify-content:center">Confirmar</button>
+  </form>
+  <div class="gracias" id="g-rsvp">¡Gracias! Ya quedó confirmado. 💛</div>
+</section>
+
+<section class="bloque rev" id="mensajes">
+  <div class="titulo">Dejale un mensaje a Martina</div>
+  <p class="frase" style="font-size:22px">Los mensajes van a aparecer en la pantalla gigante durante la fiesta.</p>
+  <form id="f-msg">
+    <label>Tu mensaje<textarea name="texto" rows="3" maxlength="180" required placeholder="Escribí algo lindo…"></textarea></label>
+    <label>Firmado por<input name="firma" maxlength="40" required placeholder="Ej: Tía Ana"></label>
+    <button class="btn oro" type="submit" style="justify-content:center">Enviar mensaje</button>
+  </form>
+  <div class="muro">
+    <div class="fondo" id="muro-fondo"></div>
+    <div class="msgs" id="msgs"></div>
+  </div>
+</section>
+
+<section class="bloque rev">
+  <div class="galeria">
+    <div class="titulo">La noche de la fiesta</div>
+    <b>📸 Este mismo link se convierte en la galería de fotos en vivo</b>
+    <p style="color:var(--suave);margin-top:8px">Guardalo: esa noche vas a ver acá las fotos de la fiesta, recién editadas, mientras seguimos bailando.</p>
+  </div>
+</section>
+
+<footer>
+  <img src="https://fotos.zingproducciones.com/logo.png" alt="Zing">
+  Invitación digital y fotos en vivo por Zing Producciones<br>
+  Por confidencialidad de nuestros clientes, las fotos de esta muestra fueron creadas con IA.
+</footer>
+
+<script>
+const EJ = n => `https://fotos.zingproducciones.com/ejemplos/ejemplo-${String(n).padStart(2, "0")}.jpg`;
+// Fotos del book (en la real: las que Zing carga y elige para esta invitación)
+const BOOK = [12, 9, 1, 2, 13].map(EJ);
+const FIESTA = new Date(2026, 10, 14, 21, 0, 0); // sábado 14 de noviembre, 21 h
+
+// Portada: fotos que pasan
+const caja = document.getElementById("fotos");
+BOOK.forEach((u, i) => { const d = document.createElement("div"); d.style.backgroundImage = `url("${u}")`; if (!i) d.className = "on"; caja.appendChild(d); });
+let i = 0; const capas = caja.children;
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
+  setInterval(() => { capas[i].classList.remove("on"); i = (i + 1) % capas.length; capas[i].classList.add("on"); }, 5500);
+
+// Cuenta regresiva
+const dos = n => String(n).padStart(2, "0");
+function contar() {
+  let s = Math.max(0, Math.floor((FIESTA - new Date()) / 1000));
+  const d = Math.floor(s / 86400); s %= 86400;
+  document.getElementById("c-d").textContent = d;
+  document.getElementById("c-h").textContent = dos(Math.floor(s / 3600));
+  document.getElementById("c-m").textContent = dos(Math.floor(s % 3600 / 60));
+  document.getElementById("c-s").textContent = dos(s % 60);
+}
+contar(); setInterval(contar, 1000);
+
+// Música
+const audio = document.getElementById("audio"), bm = document.getElementById("musica");
+bm.onclick = () => {
+  if (audio.paused) { audio.volume = .55; audio.play().then(() => { bm.classList.add("sonando"); document.getElementById("m-ico").textContent = "❚❚"; }).catch(() => {}); }
+  else { audio.pause(); bm.classList.remove("sonando"); document.getElementById("m-ico").textContent = "▶"; }
+};
+
+// Agendar (Google Calendar)
+const fmt = d => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+const fin = new Date(FIESTA.getTime() + 6 * 3600 * 1000);
+document.getElementById("agendar").href = "https://calendar.google.com/calendar/render?action=TEMPLATE"
+  + "&text=" + encodeURIComponent("Mis XV · Martina") + "&dates=" + fmt(FIESTA) + "/" + fmt(fin)
+  + "&location=" + encodeURIComponent("Salón de ejemplo, Córdoba") + "&details=" + encodeURIComponent("¡Te espero! " + location.href);
+
+// Copiar alias
+document.getElementById("copiar").onclick = async (e) => {
+  try { await navigator.clipboard.writeText(document.getElementById("alias").textContent); e.target.textContent = "¡Copiado! ✓"; } catch { e.target.textContent = "Mantené apretado el alias para copiar"; }
+};
+
+// Confirmar asistencia (en la muestra no se guarda nada)
+document.getElementById("f-rsvp").onsubmit = (e) => { e.preventDefault(); e.target.style.display = "none"; document.getElementById("g-rsvp").style.display = "block"; };
+
+// Mensajes
+document.getElementById("muro-fondo").style.backgroundImage = `url("${EJ(1)}")`;
+const msgs = document.getElementById("msgs");
+const pintar = (t, f, arriba) => { const m = document.createElement("div"); m.className = "msg"; m.innerHTML = "<p></p><span></span>"; m.querySelector("p").textContent = "“" + t + "”"; m.querySelector("span").textContent = f; arriba ? msgs.prepend(m) : msgs.append(m); };
+[["Te vi crecer y hoy te veo brillar. ¡Que sea la noche más linda de tu vida!", "Tía Ana"],
+ ["Amiga, gracias por tantos años juntas. ¡A bailar hasta que nos echen!", "Cami"],
+ ["Sos nuestro orgullo. Te amamos infinito.", "Mamá y Papá"]].forEach(([t, f]) => pintar(t, f));
+document.getElementById("f-msg").onsubmit = (e) => { e.preventDefault(); const f = new FormData(e.target); pintar(f.get("texto"), f.get("firma"), true); e.target.reset(); };
+
+// Aparecer al bajar
+const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { x.target.classList.add("ve"); io.unobserve(x.target); } }), { threshold: .12 });
+document.querySelectorAll(".rev").forEach(el => io.observe(el));
+</script>
+</body>
+</html>
