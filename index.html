@@ -61,6 +61,9 @@
     background: linear-gradient(180deg, rgba(7,3,26,.96) 70%, rgba(7,3,26,.75)); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .nota-demo { margin: 0 0 12px; padding: 8px 12px; border-radius: 10px; font-size: 12px; line-height: 1.35; color: var(--suave); background: rgba(255, 255, 255, .05); border: 1px solid var(--linea); }
   .barra-sup { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .der-sup { display: inline-flex; align-items: center; gap: 12px; }
+  .b-collage { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 99px; border: 1px solid var(--linea-2);
+    background: rgba(255,255,255,.05); font: 600 11px var(--titulo); letter-spacing: .1em; text-transform: uppercase; color: var(--texto); }
   .barra-sup img { height: 30px; filter: drop-shadow(0 0 10px rgba(255, 50, 102, .45)); }
   .vivo { display: inline-flex; align-items: center; gap: 7px; font: 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ok); }
   .vivo i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); animation: latido 1.6s infinite; }
@@ -150,7 +153,7 @@
   <header>
     <div class="barra-sup">
       <img src="/logo.png" alt="Zing" />
-      <span class="vivo" id="vivo" hidden><i></i>En vivo</span>
+      <span class="der-sup"><span class="vivo" id="vivo" hidden><i></i>En vivo</span><button class="b-collage" id="b-collage">✨ Collage</button></span>
     </div>
     <div class="titulo gradiente" id="g-nombre"></div>
     <div class="sub" id="g-sub"></div>
@@ -170,7 +173,7 @@
   <div class="img"><img id="v-img" alt="" /></div>
   <button class="flecha izq" id="v-ant" aria-label="Anterior">‹</button>
   <button class="flecha der" id="v-sig" aria-label="Siguiente">›</button>
-  <div class="acciones"><button class="btn" id="v-bajar">Descargar</button></div>
+  <div class="acciones"><button class="btn" id="v-compartir">Compartir</button><button class="btn sec" id="v-bajar">Descargar</button></div>
 </div>
 <div class="aviso" id="aviso"></div>
 
@@ -293,6 +296,7 @@ function pintar() {
     const previas = new Map([...g.children].map((el) => [el.dataset.id, el]));
     g.replaceChildren(...lista.map((f, i) => previas.get(String(f.id)) || tarjeta(f, i)));
   }
+  if (window.ZingCollage?.activo) window.ZingCollage.actualizar();
   $("g-vacio").hidden = lista.length > 0;
   $("g-vacio").innerHTML = filtro === INVITADOS
     ? "<b>Todavía no hay fotos de invitados</b>¡Subí las tuyas con el botón de abajo!"
@@ -312,7 +316,7 @@ function tarjeta(f, i) {
   img.src = url(miniatura(f.path));
   el.append(img);
   if (f.origen === "invitado") el.insertAdjacentHTML("beforeend", `<span class="de">Invitado</span>`);
-  el.onclick = () => abrirVisor(f.id);
+  el.onclick = () => (window.ZingCollage?.activo ? window.ZingCollage.tocar(f, el) : abrirVisor(f.id));
   if (f.nueva) setTimeout(() => el.classList.remove("nueva"), 6000);
   return el;
 }
@@ -350,20 +354,32 @@ $("visor").addEventListener("touchend", (e) => {
   if (toqueX === null) return; const dx = e.changedTouches[0].clientX - toqueX; toqueX = null;
   if (Math.abs(dx) > 50) mover(dx < 0 ? 1 : -1);
 });
-$("v-bajar").onclick = async () => {
+async function entregarFoto(compartir) {
   const f = visibles()[abierta]; if (!f) return;
   const nombre = `${ev.nombre.replace(/[^\w\s-]/g, "").trim() || "zing"} - ${f.id}.jpg`;
   try {
     const blob = await (await fetch(url(f.path))).blob();
     const archivo = new File([blob], nombre, { type: "image/jpeg" });
-    // En el celu, "Compartir" deja guardarla directo en la galería de fotos.
-    if (navigator.canShare?.({ files: [archivo] }) && matchMedia("(hover: none)").matches) {
-      await navigator.share({ files: [archivo] });
+    // En el celu se abre el menu del telefono: Instagram (historia, publicacion), WhatsApp o "Guardar imagen".
+    if (navigator.canShare?.({ files: [archivo] }) && (compartir || matchMedia("(hover: none)").matches)) {
+      await navigator.share(compartir ? { files: [archivo], text: "@zingproducciones 📸" } : { files: [archivo] });
     } else {
+      if (compartir) aviso("Para compartir en Instagram, abrí la galería desde el celular 📱");
       const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nombre; a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 5000);
     }
   } catch (err) { if (err.name !== "AbortError") aviso("No se pudo descargar. Probá de nuevo.", { error: true }); }
+}
+$("v-bajar").onclick = () => entregarFoto(false);
+$("v-compartir").onclick = () => entregarFoto(true);
+
+// --- Collage para Instagram (web/collage.js, se carga al usarlo) ------------
+$("b-collage").onclick = async () => {
+  if (window.ZingCollage?.activo) return window.ZingCollage.salir();
+  if (!fotos.length) return aviso("Todavía no hay fotos para armar un collage.");
+  try { if (!window.ZingCollage) await cargarScript("/collage.js"); }
+  catch { return aviso("No hay conexión. Probá de nuevo.", { error: true }); }
+  window.ZingCollage.iniciar({ ev, url, aviso });
 };
 
 // --- Subir fotos de invitados ----------------------------------------------
