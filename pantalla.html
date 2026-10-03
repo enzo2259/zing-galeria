@@ -29,6 +29,7 @@
   .gradiente { background: var(--zing); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
   /* ---------- Escena: dos capas que se funden ---------- */
+  #escena { position: absolute; inset: 0; }
   .capa { position: absolute; inset: 0; opacity: 0; transition: opacity var(--cambio) ease; overflow: hidden; }
   .capa.on { opacity: 1; }
   .capa .fondo { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(40px) brightness(.45) saturate(1.3); transform: scale(1.1); }
@@ -136,6 +137,7 @@
 <script src="/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="/ia.js"></script>
 <script>
 // Pantalla gigante del salon: pasa las fotos de la noche a medida que Zing las
 // edita, destaca las recien salidas y muestra el QR para que la gente entre.
@@ -228,6 +230,7 @@ function recibir(f, enVivo) {
   const recienVisible = visible(f) && (!antes || !visible(antes));
   if (!recienVisible || !enVivo) return;
   // Lo nuevo pasa primero; si llegan varias juntas, un solo cartel por tanda.
+  fotos.get(f.id).enVivo = true; // al pasar por primera vez, muestra como la edito la IA
   cola.push(f.id);
   tanda.push(f);
   clearTimeout(tandaReloj);
@@ -280,10 +283,25 @@ function cargarImagen(src) {
   });
 }
 
+// "IA editando en vivo": la foto antes de editar y los datos reales de la edicion
+// (los sube la app de Zing junto a cada foto: <foto>.a.jpg y <foto>.e.json).
+const CADA_IA = 5;
+async function datosIA(f) {
+  try {
+    const r = await fetch(url(f.path.replace(/\.jpg$/, ".e.json")));
+    if (!r.ok) return null;
+    const datos = await r.json();
+    const antes = await cargarImagen(url(f.path.replace(/\.jpg$/, ".a.jpg")));
+    return antes ? { datos, antes } : null;
+  } catch { return null; }
+}
+
 async function mostrar(f) {
   if (!f) return;
-  const img = await cargarImagen(url(f.path));
+  const conIA = f.origen === "zing" && window.ZingIA && ((f.enVivo && !f.iaHecha) || pasadas % CADA_IA === 0);
+  const [img, ia] = await Promise.all([cargarImagen(url(f.path)), conIA ? datosIA(f) : null]);
   if (!img) { fotos.get(f.id) && (f.fallas = (f.fallas || 0) + 1); return; }
+  if (ia) f.iaHecha = true;
   actual = f;
   const capa = $(capaA ? "capa-a" : "capa-b"), otra = $(capaA ? "capa-b" : "capa-a");
   capaA = !capaA;
@@ -296,8 +314,8 @@ async function mostrar(f) {
   const acercar = Math.random() > .35;
   el.style.setProperty("--ox", 30 + Math.random() * 40 + "%");
   el.style.setProperty("--oy", 25 + Math.random() * 40 + "%");
-  el.style.setProperty("--z0", acercar ? 1 : 1.09);
-  el.style.setProperty("--z1", acercar ? 1.09 : 1);
+  el.style.setProperty("--z0", ia ? 1 : acercar ? 1 : 1.09); // con la animacion de IA, quieta (tiene que coincidir con la "antes")
+  el.style.setProperty("--z1", ia ? 1 : acercar ? 1.09 : 1);
   el.style.setProperty("--dura", SEGUNDOS + 2 + "s");
   el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
   $("mosaico").hidden = true;
@@ -306,6 +324,7 @@ async function mostrar(f) {
   const momento = f.origen === "zing" ? nombreMomento(f.momento) : "";
   $("que").textContent = momento || ev.nombre;
   $("de-invitado").hidden = f.origen !== "invitado";
+  if (ia) await ZingIA.animar({ raiz: $("escena"), antes: ia.antes, despues: img, llena: horizontal, datos: ia.datos });
 }
 
 async function mosaico() {
