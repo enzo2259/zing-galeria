@@ -93,7 +93,7 @@
     el.className = "ia" + (llena ? " llena" : "");
     el.innerHTML = `<div class="antes"><div class="fondo"></div><div class="foto"><img alt="" /></div></div>
       <div class="grilla"></div><div class="barrido"></div>
-      <div class="panel"><div class="vivo-ia"><i></i>IA editando en vivo</div><h3><span>✦ IA Zing</span></h3><div class="pasos"></div><div class="total"></div></div>`;
+      <div class="panel"><div class="vivo-ia"><i></i>IA editando en vivo</div><h3><span>✦ Zing Engine v1</span></h3><div class="pasos"></div><div class="total"></div></div>`;
     el.querySelector(".fondo").style.backgroundImage = `url("${antes.src}")`;
     el.querySelector(".antes img").src = antes.src;
     raiz.append(el);
