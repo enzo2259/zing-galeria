@@ -62,9 +62,17 @@
     font: 700 calc(1.9 * var(--uu)) var(--titulo, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: #37f5b0; }
   .ia .total.on { opacity: 1; }
   `;
-  function estilos() {
-    if (document.getElementById("ia-css")) return;
-    const s = document.createElement("style"); s.id = "ia-css"; s.textContent = css; document.head.append(s);
+  function estilos(raiz) {
+    if (!document.getElementById("ia-css")) {
+      const s = document.createElement("style"); s.id = "ia-css"; s.textContent = css; document.head.append(s);
+    }
+    // En las paginas de la web (#zing-landing) hay estilos generales que pisan a estos:
+    // se repiten con mas prioridad, solo dentro de la pantalla de la animacion.
+    if (raiz.closest("#zing-landing") && !document.getElementById("ia-css-web")) {
+      const s = document.createElement("style"); s.id = "ia-css-web";
+      s.textContent = css.replace(/^  \.ia/gm, "  #zing-landing .zl-ia-escena .ia");
+      document.head.append(s);
+    }
   }
   const esperar = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const num = (x, d = 1) => (Math.round(x * 10 ** d) / 10 ** d).toLocaleString("es-AR", { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -79,7 +87,7 @@
   }
 
   async function animar({ raiz, antes, despues, llena, datos }) {
-    estilos();
+    estilos(raiz);
     const d = datos || {};
     const el = document.createElement("div");
     el.className = "ia" + (llena ? " llena" : "");
