@@ -89,6 +89,19 @@
   .foto .de { position: absolute; left: 6px; bottom: 6px; padding: 2px 7px; border-radius: 99px; font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; background: rgba(7,3,26,.75); color: var(--amarillo); }
   .foto.nueva { box-shadow: 0 0 0 2px var(--rosa), 0 0 24px rgba(255, 50, 102, .5); }
   @keyframes revelar { from { opacity: 0; transform: translateY(14px) scale(.97); } }
+  /* Portada: foto del book de fondo, media oscura, mientras las fotos estan en camino */
+  .portada { position: relative; margin: 0 0 12px; border-radius: 10px; overflow: hidden; min-height: 62vh; min-height: 62dvh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 40px 22px; background: #120828 center 35% / cover no-repeat; animation: revelar .8s cubic-bezier(.2,.8,.2,1) both; transition: min-height .6s; }
+  .portada::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,3,26,.42), rgba(7,3,26,.55) 55%, rgba(7,3,26,.88)); }
+  .portada > * { position: relative; }
+  .portada .ojo { display: inline-flex; align-items: center; gap: 9px; font: 12px var(--mono); letter-spacing: .24em; text-transform: uppercase; color: var(--amarillo); }
+  .portada .ojo i { width: 7px; height: 7px; border-radius: 50%; background: var(--naranja); box-shadow: 0 0 10px var(--naranja); }
+  .portada h2 { margin: 14px 0 12px; font: 700 clamp(40px, 12vw, 92px)/1 var(--titulo); letter-spacing: .01em; text-shadow: 0 4px 30px rgba(0,0,0,.55); }
+  .portada p { margin: 0; max-width: 420px; font-size: 17px; color: rgba(246,239,255,.9); text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+  .portada p b { display: block; font: 700 15px var(--titulo); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
+  .portada.chica { min-height: 170px; padding: 24px 16px; }
+  .portada.chica h2 { font-size: clamp(30px, 8vw, 56px); margin-bottom: 0; }
+  .portada.chica p { display: none; }
   .vacio { text-align: center; padding: 70px 20px; color: var(--suave); }
   .vacio b { display: block; font: 700 18px var(--titulo); text-transform: uppercase; letter-spacing: .06em; color: var(--texto); margin-bottom: 6px; }
 
@@ -159,7 +172,7 @@
     <div class="sub" id="g-sub"></div>
     <nav class="pestanas" id="pestanas"></nav>
   </header>
-  <main><div class="grilla" id="grilla"></div><div class="vacio" id="g-vacio" hidden></div></main>
+  <main><div class="portada" id="g-portada" hidden><span class="ojo"><i></i><span id="pt-fecha"></span></span><h2 id="pt-titulo"></h2><p><b>Las fotos están en camino</b>Apenas las editemos van a aparecer acá.</p></div><div class="grilla" id="grilla"></div><div class="vacio" id="g-vacio" hidden></div></main>
   <button class="subir" id="b-subir">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
     Subí tus fotos
@@ -189,7 +202,7 @@ const INVITADOS = "__invitados__";
 // El slug es el ultimo tramo del link: fotos.zingproducciones.com/xv-valentina
 const slug = decodeURIComponent(location.pathname.split("/").filter(Boolean).pop() || "");
 const params = new URLSearchParams(location.search);
-let ev = null, fotos = [], filtro = null, ultimoId = 0, abierta = -1;
+let ev = null, fotos = [], filtro = null, ultimoId = 0, abierta = -1, portada = null;
 
 const guardado = {
   get: () => { try { return localStorage.getItem("zing-codigo-" + slug); } catch { return null; } },
@@ -243,11 +256,12 @@ async function abrirGaleria() {
   $("g-sub").textContent = enVivo() ? f : `${f} · Descargá tus fotos`;
   $("vivo").hidden = !enVivo();
   pantalla("p-galeria");
+  cargarPortada();
   await traer();
   if (enVivo()) {
     // Las fotos nuevas llegan solas por el canal del evento; por las dudas se revisa cada tanto.
     sb.channel("galeria-" + ev.token).on("broadcast", { event: "foto" }, ({ payload }) => recibir(payload)).subscribe();
-    setInterval(traer, 60000);
+    setInterval(() => { traer(); cargarPortada(); }, 60000);
   }
 }
 
@@ -256,6 +270,22 @@ async function traer() {
   if (error || !data) return;
   if (data.length) { data.forEach((f) => recibir(f, false)); pintar(); }
   else if (!fotos.length) pintar();
+}
+
+// Portada que pone Zing desde la app (<token>/portada.json); si no hay, queda el cartel de siempre.
+async function cargarPortada() {
+  try {
+    const r = await fetch(url(ev.token + "/portada.json") + "?t=" + Date.now(), { cache: "no-store" });
+    const nueva = r.ok ? await r.json() : null;
+    if (JSON.stringify(nueva) === JSON.stringify(portada)) return;
+    portada = nueva;
+  } catch { return; }
+  if (portada) {
+    $("g-portada").style.backgroundImage = `url("${url(portada.foto)}")`;
+    $("pt-titulo").textContent = portada.titulo || ev.nombre;
+    $("pt-fecha").textContent = new Date(ev.fecha + "T12:00").toLocaleDateString("es-AR", { day: "numeric", month: "long" });
+  }
+  pintar();
 }
 
 function recibir(f, repintar = true) {
@@ -297,7 +327,10 @@ function pintar() {
     g.replaceChildren(...lista.map((f, i) => previas.get(String(f.id)) || tarjeta(f, i)));
   }
   if (window.ZingCollage?.activo) window.ZingCollage.actualizar();
-  $("g-vacio").hidden = lista.length > 0;
+  const conPortada = !!portada && filtro !== INVITADOS;
+  $("g-portada").hidden = !conPortada;
+  $("g-portada").classList.toggle("chica", lista.length > 0);
+  $("g-vacio").hidden = lista.length > 0 || conPortada;
   $("g-vacio").innerHTML = filtro === INVITADOS
     ? "<b>Todavía no hay fotos de invitados</b>¡Subí las tuyas con el botón de abajo!"
     : "<b>Las fotos están en camino</b>Apenas las editemos van a aparecer acá.";
