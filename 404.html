@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex" />
 <title>Zing · Fotos del evento</title>
 <link rel="icon" href="/logo.png" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" />
 <style>
   @font-face { font-family: "Chakra"; src: url(/fuentes/chakra-petch-500.woff2) format("woff2"); font-weight: 500; font-display: swap; }
   @font-face { font-family: "Chakra"; src: url(/fuentes/chakra-petch-700.woff2) format("woff2"); font-weight: 700; font-display: swap; }
@@ -91,17 +92,29 @@
   @keyframes revelar { from { opacity: 0; transform: translateY(14px) scale(.97); } }
   /* Portada: foto del book de fondo, media oscura, mientras las fotos estan en camino */
   .portada { position: relative; margin: 0 0 12px; border-radius: 10px; overflow: hidden; min-height: 62vh; min-height: 62dvh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 40px 22px; background: #120828 center 35% / cover no-repeat; animation: revelar .8s cubic-bezier(.2,.8,.2,1) both; transition: min-height .6s; }
-  .portada::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,3,26,.42), rgba(7,3,26,.55) 55%, rgba(7,3,26,.88)); }
-  .portada > * { position: relative; }
+    text-align: center; padding: 40px 22px; background: #120828; animation: revelar .8s cubic-bezier(.2,.8,.2,1) both; transition: min-height .6s; }
+  .portada .fondos, .portada .fondos > div, .portada .fondos i { position: absolute; inset: 0; }
+  .portada .fondos > div { opacity: 0; transition: opacity 1.6s ease; }
+  .portada .fondos > div.on { opacity: 1; }
+  .portada .fondos i { background: center 30% / cover no-repeat; }
+  .portada .fondos i.borroso { filter: blur(26px) brightness(.8); transform: scale(1.15); }
+  .portada .fondos > div.on i.foto { animation: acercar 9s ease-out both; }
+  @keyframes acercar { from { transform: scale(1.0); } to { transform: scale(1.06); } }
+  .portada::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,3,26,.42), rgba(7,3,26,.55) 55%, rgba(7,3,26,.88)); }
+  .portada > :not(.fondos) { position: relative; z-index: 1; }
   .portada .ojo { display: inline-flex; align-items: center; gap: 9px; font: 12px var(--mono); letter-spacing: .24em; text-transform: uppercase; color: var(--amarillo); }
   .portada .ojo i { width: 7px; height: 7px; border-radius: 50%; background: var(--naranja); box-shadow: 0 0 10px var(--naranja); }
-  .portada h2 { margin: 14px 0 12px; font: 700 clamp(40px, 12vw, 92px)/1 var(--titulo); letter-spacing: .01em; text-shadow: 0 4px 30px rgba(0,0,0,.55); }
+  .portada h2 { margin: 10px 0 10px; font: 400 clamp(58px, 17vw, 128px)/1.05 "Great Vibes", cursive; letter-spacing: 0; text-shadow: 0 4px 30px rgba(0,0,0,.6); overflow-wrap: anywhere; }
+  .portada .cuenta { display: flex; gap: 10px; margin: 6px 0 16px; }
+  .portada .cuenta div { min-width: 68px; padding: 12px 6px 9px; border-radius: 14px; background: rgba(7,3,26,.45); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .portada .cuenta b { display: block; font: 700 30px/1 var(--titulo); }
+  .portada .cuenta small { font: 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--suave); }
   .portada p { margin: 0; max-width: 420px; font-size: 17px; color: rgba(246,239,255,.9); text-shadow: 0 2px 12px rgba(0,0,0,.6); }
   .portada p b { display: block; font: 700 15px var(--titulo); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
   .portada.chica { min-height: 170px; padding: 24px 16px; }
-  .portada.chica h2 { font-size: clamp(30px, 8vw, 56px); margin-bottom: 0; }
-  .portada.chica p { display: none; }
+  .portada.chica h2 { font-size: clamp(44px, 11vw, 76px); margin-bottom: 0; }
+  .portada.chica p, .portada.chica .cuenta { display: none; }
+  body.espera .pestanas, body.espera #grilla, body.espera #b-subir, body.espera .b-collage { display: none; }
   .vacio { text-align: center; padding: 70px 20px; color: var(--suave); }
   .vacio b { display: block; font: 700 18px var(--titulo); text-transform: uppercase; letter-spacing: .06em; color: var(--texto); margin-bottom: 6px; }
 
@@ -172,7 +185,7 @@
     <div class="sub" id="g-sub"></div>
     <nav class="pestanas" id="pestanas"></nav>
   </header>
-  <main><div class="portada" id="g-portada" hidden><span class="ojo"><i></i><span id="pt-fecha"></span></span><h2 id="pt-titulo"></h2><p><b>Las fotos están en camino</b>Apenas las editemos van a aparecer acá.</p></div><div class="grilla" id="grilla"></div><div class="vacio" id="g-vacio" hidden></div></main>
+  <main><div class="portada" id="g-portada" hidden><div class="fondos" id="pt-fondos"></div><span class="ojo"><i></i><span id="pt-fecha"></span></span><h2 id="pt-titulo"></h2><div class="cuenta" id="pt-cuenta" hidden><div><b data-c="h">0</b><small>Horas</small></div><div><b data-c="m">0</b><small>Min</small></div><div><b data-c="s">0</b><small>Seg</small></div></div><p id="pt-texto"></p></div><div class="grilla" id="grilla"></div><div class="vacio" id="g-vacio" hidden></div></main>
   <button class="subir" id="b-subir">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
     Subí tus fotos
@@ -281,12 +294,42 @@ async function cargarPortada() {
     portada = nueva;
   } catch { return; }
   if (portada) {
-    $("g-portada").style.backgroundImage = `url("${url(portada.foto)}")`;
+    const lista = portada.fotos || (portada.foto ? [{ path: portada.foto }] : []);
+    // Cada foto: la misma desenfocada de fondo + la foto entera o llenando, segun entre (ver ajustarFondos)
+    $("pt-fondos").innerHTML = lista.map((f, i) => `<div class="${i ? "" : "on"}" data-r="${f.ancho && f.alto ? f.ancho / f.alto : ""}">
+      <i class="borroso" style="background-image:url('${url(f.path)}')"></i><i class="foto" style="background-image:url('${url(f.path)}')"></i></div>`).join("");
     $("pt-titulo").textContent = portada.titulo || ev.nombre;
     $("pt-fecha").textContent = new Date(ev.fecha + "T12:00").toLocaleDateString("es-AR", { day: "numeric", month: "long" });
+    clearInterval(cargarPortada._pasar);
+    if (lista.length > 1) cargarPortada._pasar = setInterval(() => {
+      const ds = [...$("pt-fondos").children], i = ds.findIndex((d) => d.classList.contains("on"));
+      ds[i].classList.remove("on"); ds[(i + 1) % ds.length].classList.add("on");
+    }, 6000);
   }
   pintar();
 }
+
+// Si la forma de la foto se parece a la del recuadro, la llena; si no (vertical en la compu,
+// horizontal en el celular, o la portada chica) se ve entera sobre su propia version desenfocada.
+function ajustarFondos() {
+  const caja = $("g-portada"); if (caja.hidden) return;
+  const rc = caja.clientWidth / Math.max(caja.clientHeight, 1);
+  for (const d of $("pt-fondos").children) {
+    const r = Number(d.dataset.r) || rc;
+    d.querySelector(".foto").style.backgroundSize = Math.max(r / rc, rc / r) < 1.35 ? "cover" : "contain";
+  }
+}
+window.addEventListener("resize", ajustarFondos);
+
+// Hasta la apertura (la pone Zing desde la app, ej. 22 h) se ve solo la portada con la cuenta regresiva.
+const enEspera = () => !!portada?.apertura && Date.now() < Date.parse(portada.apertura);
+function contar() {
+  const falta = Math.max(0, Date.parse(portada?.apertura) - Date.now()) / 1000;
+  const v = { h: Math.floor(falta / 3600), m: Math.floor((falta % 3600) / 60), s: Math.floor(falta % 60) };
+  $("pt-cuenta").querySelectorAll("b").forEach((b) => (b.textContent = String(v[b.dataset.c]).padStart(2, "0")));
+  if (falta <= 0 && document.body.classList.contains("espera")) { pintar(); traer(); }
+}
+setInterval(() => { if (portada?.apertura) contar(); }, 1000);
 
 function recibir(f, repintar = true) {
   ultimoId = Math.max(ultimoId, f.id);
@@ -327,10 +370,17 @@ function pintar() {
     g.replaceChildren(...lista.map((f, i) => previas.get(String(f.id)) || tarjeta(f, i)));
   }
   if (window.ZingCollage?.activo) window.ZingCollage.actualizar();
-  const conPortada = !!portada && filtro !== INVITADOS;
+  const espera = enEspera(), conPortada = !!portada && (espera || filtro !== INVITADOS);
+  document.body.classList.toggle("espera", espera);
   $("g-portada").hidden = !conPortada;
-  $("g-portada").classList.toggle("chica", lista.length > 0);
+  $("g-portada").classList.toggle("chica", lista.length > 0 && !espera);
+  $("pt-cuenta").hidden = !espera;
+  if (espera) contar();
+  const hora = espera && new Date(portada.apertura).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const texto = espera ? `<b>Las fotos empiezan a salir a las ${hora} h</b>Volvé a esta página: se abre sola.` : "<b>Las fotos están en camino</b>Apenas las editemos van a aparecer acá.";
+  if ($("pt-texto").innerHTML !== texto) $("pt-texto").innerHTML = texto;
   $("g-vacio").hidden = lista.length > 0 || conPortada;
+  ajustarFondos();
   $("g-vacio").innerHTML = filtro === INVITADOS
     ? "<b>Todavía no hay fotos de invitados</b>¡Subí las tuyas con el botón de abajo!"
     : "<b>Las fotos están en camino</b>Apenas las editemos van a aparecer acá.";
@@ -424,7 +474,9 @@ if (DEMO) {
   n.textContent = "🔒 Galería de demostración: por confidencialidad de nuestros clientes, las fotos fueron creadas con IA.";
   $("p-galeria").querySelector("header").prepend(n);
 }
-$("b-subir").onclick = () => DEMO
+$("b-subir").onclick = () => enEspera()
+  ? aviso("Las fotos se pueden subir cuando se abre la galería.")
+  : DEMO
   ? aviso("<b>Esta es una galería de demostración.</b><br>En tu fiesta, acá tus invitados suben sus fotos y aparecen en la galería apenas Zing las aprueba.")
   : $("archivos").click();
 $("archivos").onchange = async (e) => {
