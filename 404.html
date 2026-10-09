@@ -392,7 +392,7 @@ if (DEMO) {
   $("p-galeria").querySelector("header").prepend(n);
 }
 $("b-subir").onclick = () => DEMO
-  ? aviso("<b>Esta es una galería de demostración.</b><br>En tu fiesta, acá tus invitados suben sus fotos y aparecen al instante.")
+  ? aviso("<b>Esta es una galería de demostración.</b><br>En tu fiesta, acá tus invitados suben sus fotos y aparecen en la galería apenas Zing las aprueba.")
   : $("archivos").click();
 $("archivos").onchange = async (e) => {
   const archivos = [...e.target.files].filter((f) => f.type.startsWith("image/") || /\.(jpe?g|png|heic|heif|webp)$/i.test(f.name));
@@ -403,10 +403,9 @@ $("archivos").onchange = async (e) => {
     aviso(`Subiendo ${i + 1} de ${archivos.length}…<div class="barra"><div style="width:${(i / archivos.length) * 100}%"></div></div>`, { fijo: true });
     try { await subirUna(archivo); ok++; } catch (err) { console.error(err); mal++; }
   }
-  if (ok) aviso(enVivo() ? `¡Gracias! ${ok === 1 ? "Tu foto ya está" : `Tus ${ok} fotos ya están`} en la galería 💜`
+  if (ok) aviso(enVivo() ? `¡Gracias! ${ok === 1 ? "Tu foto llegó" : `Tus ${ok} fotos llegaron`} a Zing 💜<br>En un ratito ${ok === 1 ? "aparece" : "aparecen"} en la galería`
                           : `¡Gracias! ${ok === 1 ? "Tu foto llegó" : `Tus ${ok} fotos llegaron`} a Zing 💜`);
   if (mal) setTimeout(() => aviso(`${mal} ${mal === 1 ? "foto no se pudo" : "fotos no se pudieron"} subir. Probá de nuevo.`, { error: true }), ok ? 4200 : 0);
-  if (ok && enVivo()) { filtro = INVITADOS; pintar(); traer(); }
 };
 
 async function achicar(archivo, lado) {
