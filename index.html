@@ -241,7 +241,8 @@ function aviso(html, { error = false, fijo = false } = {}) {
   a.innerHTML = html; a.className = "aviso on" + (error ? " error" : "");
   clearTimeout(a._t); if (!fijo) a._t = setTimeout(() => (a.className = "aviso"), 4000);
 }
-const url = (path) => sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+// ?v=<id de la foto>: si se borra y se vuelve a subir con el mismo nombre, el celular no muestra la vieja (cache de 1 año).
+const url = (path, v) => sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl + (v ? "?v=" + v : "");
 const miniatura = (path) => path.replace(/\.jpg$/, ".m.jpg");
 
 // --- Entrar ---------------------------------------------------------------
@@ -419,8 +420,8 @@ function tarjeta(f, i) {
   const img = document.createElement("img");
   img.loading = "lazy"; img.alt = ""; img.decoding = "async";
   img.onload = () => img.classList.add("listo");
-  img.onerror = () => { if (!img.dataset.grande) { img.dataset.grande = 1; img.src = url(f.path); } };
-  img.src = url(miniatura(f.path));
+  img.onerror = () => { if (!img.dataset.grande) { img.dataset.grande = 1; img.src = url(f.path, f.id); } };
+  img.src = url(miniatura(f.path), f.id);
   el.append(img);
   if (f.origen === "invitado") el.insertAdjacentHTML("beforeend", `<span class="de">Invitado</span>`);
   el.onclick = () => (window.ZingCollage?.activo ? window.ZingCollage.tocar(f, el) : abrirVisor(f.id));
@@ -442,8 +443,8 @@ function abrirVisor(id) {
 }
 function mostrar() {
   const lista = visibles(), f = lista[abierta]; if (!f) return cerrarVisor();
-  $("v-img").src = url(miniatura(f.path));
-  const grande = new Image(); grande.onload = () => { if (visibles()[abierta]?.id === f.id) $("v-img").src = grande.src; }; grande.src = url(f.path);
+  $("v-img").src = url(miniatura(f.path), f.id);
+  const grande = new Image(); grande.onload = () => { if (visibles()[abierta]?.id === f.id) $("v-img").src = grande.src; }; grande.src = url(f.path, f.id);
   $("v-contador").textContent = `${abierta + 1} / ${lista.length}`;
 }
 function mover(d) { const n = visibles().length; abierta = (abierta + d + n) % n; mostrar(); }
@@ -465,7 +466,7 @@ async function entregarFoto(compartir) {
   const f = visibles()[abierta]; if (!f) return;
   const nombre = `${ev.nombre.replace(/[^\w\s-]/g, "").trim() || "zing"} - ${f.id}.jpg`;
   try {
-    const blob = await (await fetch(url(f.path))).blob();
+    const blob = await (await fetch(url(f.path, f.id))).blob();
     const archivo = new File([blob], nombre, { type: "image/jpeg" });
     // En el celu se abre el menu del telefono: Instagram (historia, publicacion), WhatsApp o "Guardar imagen".
     if (navigator.canShare?.({ files: [archivo] }) && (compartir || matchMedia("(hover: none)").matches)) {

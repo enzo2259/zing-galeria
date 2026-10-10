@@ -87,7 +87,7 @@
 
   // --- Dibujar -----------------------------------------------------------------
   async function cargar(f) {
-    const blob = await (await fetch(ctx.url(f.path))).blob();
+    const blob = await (await fetch(ctx.url(f.path, f.id))).blob();
     return createImageBitmap(blob);
   }
 
